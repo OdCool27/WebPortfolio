@@ -2,6 +2,7 @@ import {motion} from 'motion/react';
 import Carousel from '../components/Carousel';
 import {useState, useEffect} from 'react';
 import {collection, getDocs} from 'firebase/firestore';
+import {ExternalLink} from 'lucide-react';
 import {db} from '../lib/firebase';
 import {normalizeProject, sortProjectsByRecency, type ProjectRecord} from '../lib/projects';
 
@@ -75,6 +76,16 @@ export default function Projects() {
                   <span className="text-[10px] font-mono text-zinc-400 ml-auto">{site.date}</span>
                 </div>
                 <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{site.description}</p>
+                {site.url && (
+                  <a
+                    href={site.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-teal"
+                  >
+                    Visit Site <ExternalLink size={14} />
+                  </a>
+                )}
               </div>
             </motion.article>
           ))}
@@ -109,6 +120,16 @@ export default function Projects() {
                   <span className="text-[10px] font-mono text-zinc-400 ml-auto">{app.date}</span>
                 </div>
                 <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{app.description}</p>
+                {app.url && (
+                  <a
+                    href={app.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-teal"
+                  >
+                    Visit Site <ExternalLink size={14} />
+                  </a>
+                )}
               </div>
             </motion.article>
           ))}
@@ -132,6 +153,16 @@ export default function Projects() {
                 </div>
                 <h4 className="text-xs font-bold uppercase tracking-widest mb-1">{temp.title}</h4>
                 <p className="text-[9px] text-zinc-400 uppercase tracking-widest">Wireframe / UI Design</p>
+                {temp.url && (
+                  <a
+                    href={temp.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-teal"
+                  >
+                    Visit Site <ExternalLink size={14} />
+                  </a>
+                )}
               </div>
             ))
           ) : (
@@ -154,6 +185,16 @@ export default function Projects() {
                  <div>
                     <h3 className="text-2xl font-bold mb-4">{app.title}</h3>
                     <p className="text-sm opacity-60">{app.description}</p>
+                    {app.url && (
+                      <a
+                        href={app.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-teal"
+                      >
+                        Visit Site <ExternalLink size={14} />
+                      </a>
+                    )}
                  </div>
               </motion.article>
             ))}

@@ -154,7 +154,14 @@ export default function Home() {
                     <div className="absolute inset-0 bg-teal-600 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-4">
                       <span className="text-[10px] font-bold uppercase mb-4">{site.title || site.name}</span>
                       <div className="flex gap-2">
-                        <a href={site.url || '#'} className="px-3 py-1.5 bg-white text-zinc-900 text-[9px] font-bold rounded uppercase tracking-wider">VISIT</a>
+                        <a
+                          href={site.url || '#'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 bg-white text-zinc-900 text-[9px] font-bold rounded uppercase tracking-wider"
+                        >
+                          VISIT
+                        </a>
                         <Link to="/projects" className="px-3 py-1.5 border border-white text-white text-[9px] font-bold rounded uppercase tracking-wider">MORE</Link>
                       </div>
                     </div>
