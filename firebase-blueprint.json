@@ -1,0 +1,54 @@
+{
+  "entities": {
+    "Skill": {
+      "title": "Skill",
+      "description": "Technical skill with a proficiency level",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Name of the skill" },
+        "level": { "type": "number", "description": "Proficiency level from 1 to 10" },
+        "category": { "type": "string", "description": "e.g. Frontend, Backend, Language" }
+      },
+      "required": ["name", "level"]
+    },
+    "Project": {
+      "title": "Project",
+      "description": "A portfolio project (Website or Application)",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "type": { "type": "string", "enum": ["Website", "Application", "Template"] },
+        "businessName": { "type": "string" },
+        "logoUrl": { "type": "string" },
+        "images": { "type": "array", "items": { "type": "string" } },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "date": { "type": "string" },
+        "description": { "type": "string" },
+        "detailedDescription": { "type": "string" },
+        "url": { "type": "string" }
+      },
+      "required": ["title", "type", "description"]
+    },
+    "BlogPost": {
+      "title": "Blog Post",
+      "description": "A post about technology or business integration",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "excerpt": { "type": "string" },
+        "content": { "type": "string" },
+        "category": { "type": "string" },
+        "author": { "type": "string" },
+        "date": { "type": "string" },
+        "readTime": { "type": "string" },
+        "image": { "type": "string" }
+      },
+      "required": ["title", "content", "date"]
+    }
+  },
+  "firestore": {
+    "/skills": { "schema": "Skill", "description": "List of technical skills" },
+    "/projects": { "schema": "Project", "description": "Portfolio projects" },
+    "/blogPosts": { "schema": "BlogPost", "description": "Journal entries" }
+  }
+}

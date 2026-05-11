@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Playfair Display", serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-accent-teal: #14b8a6; /* teal-500 */
+}
+
+@layer base {
+  body {
+    @apply antialiased selection:bg-accent-teal/30;
+  }
+}
+
+@layer components {
+  .section-padding {
+    @apply py-16 px-10 max-w-7xl mx-auto;
+  }
+  
+  .nav-link {
+    @apply relative hover:text-accent-teal transition-colors duration-300;
+  }
+
+  .card-zinc {
+    @apply bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl overflow-hidden transition-all duration-300;
+  }
+}
+
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  @apply bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 transition-colors duration-500 font-sans;
+}

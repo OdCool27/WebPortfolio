@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      // In a real production app, we'd check an 'admins' collection.
+      // For this specific turn and based on the user's focus, we'll gate by email.
+      return isSignedIn() && 
+             request.auth.token.email == 'odanecollins@gmail.com' && 
+             request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Skills
+    match /skills/{skillId} {
+      allow read: if true; 
+      allow write: if isAdmin();
+      
+      function isValidSkill(data) {
+        return data.name is string && data.name.size() < 100 &&
+               data.level is number && data.level >= 1 && data.level <= 10;
+      }
+    }
+
+    // Projects
+    match /projects/{projectId} {
+      allow read: if true;
+      allow write: if isAdmin();
+
+      function isValidProject(data) {
+        return data.title is string && data.title.size() < 200 &&
+               data.type in ['Website', 'Application', 'Template', 'Mobile'];
+      }
+    }
+
+    // Blog Posts
+    match /blogPosts/{postId} {
+      allow read: if true;
+      allow write: if isAdmin();
+
+      function isValidBlogPost(data) {
+        return data.title is string && data.title.size() < 300 &&
+               data.date is string;
+      }
+    }
+  }
+}
