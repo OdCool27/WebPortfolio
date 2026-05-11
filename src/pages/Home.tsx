@@ -51,7 +51,7 @@ export default function Home() {
             initial={{ opacity: 0, scale: 0.8 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="w-32 h-32 rounded-full bg-teal-100 dark:bg-teal-900 border-2 border-accent-teal overflow-hidden mb-8"
+            className="w-48 h-48 rounded-full bg-teal-100 dark:bg-teal-900 border-2 border-accent-teal overflow-hidden mb-8"
           >
             <img 
               src={myImage}

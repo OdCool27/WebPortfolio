@@ -51,24 +51,24 @@ export default function Projects() {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="grid gap-8"
+              className="rounded-3xl border border-zinc-100 bg-zinc-50 p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80"
             >
-              <div className="flex justify-between items-center bg-zinc-50 dark:bg-zinc-900 p-6 border border-zinc-100 dark:border-zinc-800 rounded-xl">
+              <div className="flex justify-between items-center rounded-2xl border border-zinc-100 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
                 <div className="flex items-center gap-4">
                   <span className="text-xl font-bold tracking-tight">{site.businessName || site.business}</span>
                   <div className="h-4 w-[1px] bg-accent-teal/30" />
                   <span className="text-[10px] uppercase tracking-widest text-zinc-400">{site.title}</span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <img src={site.logoUrl || site.logo} alt="Logo" className="w-10 h-10 grayscale opacity-50 object-contain" referrerPolicy="no-referrer" />
+                  <img src={site.logoUrl || site.logo} alt="Logo" className="w-14 h-14 grayscale opacity-60 object-contain" referrerPolicy="no-referrer" />
                 </div>
               </div>
               
-              <div className="rounded-2xl overflow-hidden">
+              <div className="mt-6 max-w-4xl overflow-hidden rounded-2xl">
                 <Carousel images={site.images} />
               </div>
               
-              <div className="max-w-4xl px-2">
+              <div className="mt-6 max-w-4xl px-2">
                 <div className="flex gap-2 mb-6">
                   {site.tags.map((tag, j) => (
                     <span key={j} className="text-[9px] font-bold bg-zinc-100 dark:bg-zinc-800 px-3 py-1 uppercase tracking-wider rounded-full">{tag}</span>
@@ -105,13 +105,13 @@ export default function Projects() {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="grid gap-8"
+              className="rounded-3xl border border-zinc-100 bg-zinc-50 p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80"
             >
-              <div className="rounded-2xl overflow-hidden">
+              <div className="max-w-4xl overflow-hidden rounded-2xl">
                 <Carousel images={app.images} />
               </div>
               
-              <div className="max-w-4xl px-2">
+              <div className="mt-6 max-w-4xl px-2">
                 <h3 className="text-2xl font-bold mb-4 tracking-tight">{app.title}</h3>
                 <div className="flex gap-2 mb-6">
                   {app.tags && app.tags.map((tag: string, j: number) => (
@@ -180,9 +180,11 @@ export default function Projects() {
         {mobileApps.length > 0 ? (
           <div className="grid md:grid-cols-2 gap-8">
             {mobileApps.map((app, i) => (
-              <motion.article key={i} className="grid gap-8">
-                 <Carousel images={app.images} />
-                 <div>
+              <motion.article key={i} className="rounded-3xl border border-zinc-100 bg-zinc-50 p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+                 <div className="overflow-hidden rounded-2xl">
+                   <Carousel images={app.images} />
+                 </div>
+                 <div className="mt-6">
                     <h3 className="text-2xl font-bold mb-4">{app.title}</h3>
                     <p className="text-sm opacity-60">{app.description}</p>
                     {app.url && (
