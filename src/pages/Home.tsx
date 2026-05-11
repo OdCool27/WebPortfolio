@@ -6,6 +6,7 @@ import {Link} from 'react-router-dom';
 import {useState, useEffect} from 'react';
 import {collection, getDocs, query, orderBy, limit} from 'firebase/firestore';
 import {db} from '../lib/firebase';
+import myImage from '../assets/odane.JPEG';
 
 export default function Home() {
   const {register, handleSubmit, formState: {errors}} = useForm();
@@ -50,7 +51,7 @@ export default function Home() {
             className="w-32 h-32 rounded-full bg-teal-100 dark:bg-teal-900 border-2 border-accent-teal overflow-hidden mb-8"
           >
             <img 
-              src="https://picsum.photos/seed/odane/400/400" 
+              src={myImage}
               alt="Odane Collins" 
               className="w-full h-full object-cover grayscale"
               referrerPolicy="no-referrer"
