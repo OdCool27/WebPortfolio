@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {User, signInWithPopup, signOut} from 'firebase/auth';
+import {User, signInWithPopup, signInWithRedirect, signOut} from 'firebase/auth';
 import {collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, setDoc} from 'firebase/firestore';
 import {auth, db, googleProvider, handleFirestoreError, OperationType} from '../lib/firebase';
 import {motion} from 'motion/react';
@@ -17,6 +17,7 @@ export default function Admin({user}: AdminProps) {
   const [items, setItems] = useState<any[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   // Form states
   const [formData, setFormData] = useState<any>({});
@@ -44,10 +45,34 @@ export default function Admin({user}: AdminProps) {
   };
 
   const handleLogin = async () => {
+    setAuthError(null);
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (error) {
       console.error(error);
+      const code = typeof error === 'object' && error && 'code' in error ? String(error.code) : '';
+
+      if (code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request') {
+        await signInWithRedirect(auth, googleProvider);
+        return;
+      }
+
+      if (code === 'auth/popup-closed-by-user') {
+        setAuthError('The Google sign-in popup was closed before login completed. Please try again and finish the sign-in flow.');
+        return;
+      }
+
+      if (code === 'auth/unauthorized-domain') {
+        setAuthError('This site domain is not authorized in Firebase Authentication yet. Add your Netlify domain under Firebase Authentication > Settings > Authorized domains.');
+        return;
+      }
+
+      if (code === 'auth/operation-not-allowed') {
+        setAuthError('Google sign-in is not enabled for this Firebase project. Turn it on under Firebase Authentication > Sign-in method.');
+        return;
+      }
+
+      setAuthError('Google sign-in failed. Check Firebase Authentication settings and the browser console for the exact error.');
     }
   };
 
@@ -130,6 +155,11 @@ export default function Admin({user}: AdminProps) {
         >
           Login with Google
         </button>
+        {authError && (
+          <p className="mt-6 max-w-xl text-center text-sm text-red-500">
+            {authError}
+          </p>
+        )}
       </div>
     );
   }
