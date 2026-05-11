@@ -1,18 +1,20 @@
 import {motion} from 'motion/react';
 import Carousel from '../components/Carousel';
 import {useState, useEffect} from 'react';
-import {collection, getDocs, query, orderBy} from 'firebase/firestore';
+import {collection, getDocs} from 'firebase/firestore';
 import {db} from '../lib/firebase';
+import {normalizeProject, sortProjectsByRecency, type ProjectRecord} from '../lib/projects';
 
 export default function Projects() {
-  const [projects, setProjects] = useState<any[]>([]);
+  const [projects, setProjects] = useState<ProjectRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const snap = await getDocs(query(collection(db, 'projects'), orderBy('date', 'desc')));
-        setProjects(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        const snap = await getDocs(collection(db, 'projects'));
+        const normalizedProjects = snap.docs.map(doc => normalizeProject({ id: doc.id, ...doc.data() }));
+        setProjects(sortProjectsByRecency(normalizedProjects));
       } catch (error) {
         console.error(error);
       } finally {

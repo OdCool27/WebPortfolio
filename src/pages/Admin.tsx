@@ -1,9 +1,10 @@
 import React, {useState, useEffect} from 'react';
 import {User, signInWithPopup, signInWithRedirect, signOut} from 'firebase/auth';
-import {collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, setDoc} from 'firebase/firestore';
+import {collection, getDocs, addDoc, updateDoc, deleteDoc, doc, writeBatch, serverTimestamp} from 'firebase/firestore';
 import {auth, db, googleProvider, handleFirestoreError, OperationType} from '../lib/firebase';
+import {normalizeProject, sortProjectsByRecency} from '../lib/projects';
 import {motion} from 'motion/react';
-import {Plus, Trash2, Edit2, LogOut, Check, Save, X, Database} from 'lucide-react';
+import {Plus, Trash2, Edit2, LogOut, Save, X, Database} from 'lucide-react';
 
 interface AdminProps {
   user: User | null;
@@ -33,10 +34,21 @@ export default function Admin({user}: AdminProps) {
   const fetchItems = async () => {
     setLoading(true);
     try {
-      const colRef = collection(db, activeTab === 'blog' ? 'blogPosts' : activeTab);
-      const q = query(colRef, orderBy(activeTab === 'skills' ? 'level' : 'date', 'desc'));
-      const snapshot = await getDocs(q);
-      setItems(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+      const colName = activeTab === 'blog' ? 'blogPosts' : activeTab;
+      const snapshot = await getDocs(collection(db, colName));
+      const docs: any[] = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      if (activeTab === 'skills') {
+        setItems(docs.sort((a, b) => Number(b.level ?? 0) - Number(a.level ?? 0)));
+        return;
+      }
+
+      if (activeTab === 'projects') {
+        setItems(sortProjectsByRecency(docs.map(normalizeProject)));
+        return;
+      }
+
+      setItems(docs.sort((a, b) => String(b.date ?? '').localeCompare(String(a.date ?? ''))));
     } catch (error) {
       console.error(error);
     } finally {
@@ -83,15 +95,50 @@ export default function Admin({user}: AdminProps) {
     setLoading(true);
     const colName = activeTab === 'blog' ? 'blogPosts' : activeTab;
     try {
-      if (editingId) {
-        await updateDoc(doc(db, colName, editingId), formData);
+      const payload = activeTab === 'projects'
+        ? {
+            ...formData,
+            images: Array.isArray(formData.images) ? formData.images.filter(Boolean) : [],
+            tags: Array.isArray(formData.tags) ? formData.tags.filter(Boolean) : [],
+            featuredOnHome: Boolean(formData.featuredOnHome),
+            updatedAt: serverTimestamp(),
+          }
+        : {
+            ...formData,
+            updatedAt: serverTimestamp(),
+          };
+
+      if (activeTab === 'projects' && payload.featuredOnHome) {
+        const batch = writeBatch(db);
+        const projectsSnap = await getDocs(collection(db, 'projects'));
+
+        projectsSnap.docs.forEach((projectDoc) => {
+          if (projectDoc.id !== editingId && projectDoc.data().featuredOnHome) {
+            batch.update(projectDoc.ref, {featuredOnHome: false, updatedAt: serverTimestamp()});
+          }
+        });
+
+        if (editingId) {
+          batch.update(doc(db, colName, editingId), payload);
+        } else {
+          const newRef = doc(collection(db, colName));
+          batch.set(newRef, {...payload, createdAt: serverTimestamp()});
+        }
+
+        await batch.commit();
+      } else if (editingId) {
+        await updateDoc(doc(db, colName, editingId), payload);
       } else {
-        await addDoc(collection(db, colName), formData);
+        await addDoc(collection(db, colName), {
+          ...payload,
+          createdAt: serverTimestamp(),
+        });
       }
+
       setEditingId(null);
       setShowAddForm(false);
       setFormData({});
-      fetchItems();
+      await fetchItems();
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, colName);
     } finally {
@@ -224,7 +271,10 @@ export default function Admin({user}: AdminProps) {
           <div key={item.id} className="card-zinc p-6 flex justify-between items-center group">
             <div>
               <h3 className="font-bold text-lg">{item.title || item.name}</h3>
-              <p className="text-xs text-zinc-500 mt-1 line-clamp-1">{item.description || item.excerpt || `Level: ${item.level}`}</p>
+              <p className="text-xs text-zinc-500 mt-1 line-clamp-1">
+                {item.description || item.excerpt || `Level: ${item.level}`}
+                {item.featuredOnHome ? ' • Featured on home' : ''}
+              </p>
             </div>
             <div className="flex gap-2">
               <button 
@@ -283,6 +333,7 @@ export default function Admin({user}: AdminProps) {
                     </select>
                   </div>
                   <Input label="Business Name (Optional)" field="businessName" value={formData.businessName} onChange={v => setFormData({...formData, businessName: v})} />
+                  <Input label="Project URL (Optional)" field="url" value={formData.url} onChange={v => setFormData({...formData, url: v})} />
                   <Input label="Logo URL" field="logoUrl" value={formData.logoUrl} onChange={v => setFormData({...formData, logoUrl: v})} />
                   <Input 
                     label="Image URLs (Comma separated)" 
@@ -290,7 +341,22 @@ export default function Admin({user}: AdminProps) {
                     value={formData.images?.join(', ')} 
                     onChange={v => setFormData({...formData, images: v.split(',').map(s => s.trim())})} 
                   />
+                  <Input 
+                    label="Tags (Comma separated)" 
+                    field="tags" 
+                    value={Array.isArray(formData.tags) ? formData.tags.join(', ') : ''} 
+                    onChange={v => setFormData({...formData, tags: v.split(',').map(s => s.trim()).filter(Boolean)})} 
+                  />
                   <Input label="Date" field="date" type="date" value={formData.date} onChange={v => setFormData({...formData, date: v})} />
+                  <label className="flex items-center gap-3 rounded-xl bg-zinc-50 px-4 py-3 text-sm dark:bg-zinc-800">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(formData.featuredOnHome)}
+                      onChange={e => setFormData({...formData, featuredOnHome: e.target.checked})}
+                      className="h-4 w-4"
+                    />
+                    <span>Feature this project on the home page</span>
+                  </label>
                   <div className="flex flex-col gap-2">
                     <label className="text-[10px] uppercase font-bold text-zinc-400">Description</label>
                     <textarea 

@@ -4,14 +4,15 @@ import {ArrowRight, ExternalLink, Mail, Send} from 'lucide-react';
 import {useForm} from 'react-hook-form';
 import {Link} from 'react-router-dom';
 import {useState, useEffect} from 'react';
-import {collection, getDocs, query, orderBy, limit} from 'firebase/firestore';
+import {collection, getDocs, query, orderBy} from 'firebase/firestore';
 import {db} from '../lib/firebase';
+import {getFeaturedProject, normalizeProject, sortProjectsByRecency, type ProjectRecord} from '../lib/projects';
 import myImage from '../assets/odane.JPEG';
 
 export default function Home() {
   const {register, handleSubmit, formState: {errors}} = useForm();
   const [skills, setSkills] = useState<any[]>([]);
-  const [projects, setProjects] = useState<any[]>([]);
+  const [projects, setProjects] = useState<ProjectRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,8 +21,9 @@ export default function Home() {
         const skillsSnap = await getDocs(query(collection(db, 'skills'), orderBy('level', 'desc')));
         setSkills(skillsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 
-        const projectsSnap = await getDocs(query(collection(db, 'projects'), limit(6)));
-        setProjects(projectsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        const projectsSnap = await getDocs(collection(db, 'projects'));
+        const normalizedProjects = projectsSnap.docs.map(doc => normalizeProject({ id: doc.id, ...doc.data() }));
+        setProjects(sortProjectsByRecency(normalizedProjects));
       } catch (error) {
         console.error(error);
       } finally {
@@ -33,6 +35,7 @@ export default function Home() {
 
   const websites = projects.filter(p => p.type === 'Website');
   const applications = projects.filter(p => p.type === 'Application');
+  const featuredProject = getFeaturedProject(projects);
 
   const onSubmit = (data: any) => {
     console.log(data);
@@ -67,12 +70,13 @@ export default function Home() {
         <div className="w-full md:w-2/3 flex flex-col gap-8">
           <div className="flex flex-col gap-4">
             <h3 className="text-xs uppercase tracking-widest font-bold text-accent-teal">Featured Project</h3>
-            {applications.length > 0 ? (
+            {featuredProject ? (
               <div className="relative group aspect-video card-zinc cursor-pointer">
-                <img src={applications[0].images?.[0] || applications[0].image} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" referrerPolicy="no-referrer" />
+                <img src={featuredProject.images[0] || featuredProject.image} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" referrerPolicy="no-referrer" />
                 <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent text-white">
-                  <h4 className="text-2xl font-bold">{applications[0].title}</h4>
-                  <p className="text-xs opacity-70">Click to explore</p>
+                  <p className="text-[10px] uppercase tracking-widest opacity-70 mb-2">{featuredProject.type || 'Project'}</p>
+                  <h4 className="text-2xl font-bold">{featuredProject.title}</h4>
+                  <p className="text-xs opacity-70">{featuredProject.featuredOnHome ? 'Selected from admin' : 'Most recently added project'}</p>
                 </div>
               </div>
             ) : (
@@ -130,7 +134,7 @@ export default function Home() {
               {loading ? 
                 [1,2,3,4].map(i => <div key={i} className="aspect-square bg-zinc-100 dark:bg-zinc-900 animate-pulse rounded-xl" />)
                : websites.length > 0 ? (
-                websites.map((site) => (
+                websites.slice(0, 6).map((site) => (
                   <motion.div 
                     key={site.id}
                     className="relative group aspect-square bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl flex items-center justify-center cursor-pointer overflow-hidden transition-all duration-300"
@@ -160,7 +164,7 @@ export default function Home() {
               {loading ? 
                 [1,2].map(i => <div key={i} className="h-32 bg-zinc-100 dark:bg-zinc-900 animate-pulse rounded-xl" />)
                : applications.length > 0 ? (
-                applications.map((app, i) => (
+                applications.slice(0, 4).map((app, i) => (
                   <motion.div 
                     key={i}
                     initial={{ opacity: 0, y: 30 }}
