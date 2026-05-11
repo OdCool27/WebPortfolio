@@ -19,7 +19,9 @@ const getDefaultProjectForm = () => ({
   url: '',
   logoUrl: '',
   images: [],
+  imagesInput: '',
   tags: [],
+  tagsInput: '',
   date: '',
   description: '',
   featuredOnHome: false,
@@ -28,6 +30,8 @@ const getDefaultProjectForm = () => ({
 const getProjectFormData = (item: any) => ({
   ...getDefaultProjectForm(),
   ...normalizeProject(item),
+  imagesInput: Array.isArray(item.images) ? item.images.join(', ') : typeof item.image === 'string' ? item.image : '',
+  tagsInput: Array.isArray(item.tags) ? item.tags.join(', ') : typeof item.tags === 'string' ? item.tags : '',
 });
 
 export default function Admin({user}: AdminProps) {
@@ -122,8 +126,8 @@ export default function Admin({user}: AdminProps) {
             businessName: String(formData.businessName ?? '').trim(),
             url: String(formData.url ?? '').trim(),
             logoUrl: String(formData.logoUrl ?? '').trim(),
-            images: Array.isArray(formData.images) ? formData.images.map(String).map((value) => value.trim()).filter(Boolean) : [],
-            tags: Array.isArray(formData.tags) ? formData.tags.map(String).map((value) => value.trim()).filter(Boolean) : [],
+            images: String(formData.imagesInput ?? '').split(',').map((value) => value.trim()).filter(Boolean),
+            tags: String(formData.tagsInput ?? '').split(',').map((value) => value.trim()).filter(Boolean),
             date: String(formData.date ?? '').trim(),
             description: String(formData.description ?? '').trim(),
             featuredOnHome: Boolean(formData.featuredOnHome),
@@ -388,14 +392,14 @@ export default function Admin({user}: AdminProps) {
                   <Input 
                     label="Image URLs (Comma separated)" 
                     field="images" 
-                    value={formData.images?.join(', ')} 
-                    onChange={v => setFormData({...formData, images: v.split(',').map(s => s.trim())})} 
+                    value={formData.imagesInput ?? ''} 
+                    onChange={v => setFormData({...formData, imagesInput: v})} 
                   />
                   <Input 
                     label="Tags (Comma separated)" 
                     field="tags" 
-                    value={Array.isArray(formData.tags) ? formData.tags.join(', ') : ''} 
-                    onChange={v => setFormData({...formData, tags: v.split(',').map(s => s.trim()).filter(Boolean)})} 
+                    value={formData.tagsInput ?? ''} 
+                    onChange={v => setFormData({...formData, tagsInput: v})} 
                   />
                   <Input label="Date" field="date" type="date" value={formData.date} onChange={v => setFormData({...formData, date: v})} />
                   <label className="flex items-center gap-3 rounded-xl bg-zinc-50 px-4 py-3 text-sm dark:bg-zinc-800">
