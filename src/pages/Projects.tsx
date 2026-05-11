@@ -59,7 +59,7 @@ export default function Projects() {
                   <span className="text-[10px] uppercase tracking-widest text-zinc-400">{site.title}</span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <img src={site.logoUrl || site.logo} alt="Logo" className="w-10 h-10 grayscale opacity-50 object-contain" />
+                  <img src={site.logoUrl || site.logo} alt="Logo" className="w-10 h-10 grayscale opacity-50 object-contain" referrerPolicy="no-referrer" />
                 </div>
               </div>
               
@@ -128,7 +128,7 @@ export default function Projects() {
             templates.map((temp, i) => (
               <div key={i} className="group cursor-pointer">
                 <div className="aspect-[4/3] bg-zinc-50 dark:bg-zinc-900 overflow-hidden mb-4 border border-zinc-100 dark:border-zinc-800 rounded-xl">
-                  <img src={temp.images?.[0] || temp.image} alt={temp.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 grayscale group-hover:grayscale-0" referrerPolicy="no-referrer" />
+                  <img src={temp.images?.[0] || temp.image} alt={temp.title} className="w-full h-full object-contain bg-white dark:bg-zinc-950 transition-transform duration-500 group-hover:scale-110 grayscale group-hover:grayscale-0" referrerPolicy="no-referrer" />
                 </div>
                 <h4 className="text-xs font-bold uppercase tracking-widest mb-1">{temp.title}</h4>
                 <p className="text-[9px] text-zinc-400 uppercase tracking-widest">Wireframe / UI Design</p>

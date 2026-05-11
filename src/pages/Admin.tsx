@@ -12,6 +12,19 @@ interface AdminProps {
 
 const ADMIN_EMAIL = 'odanecollins@gmail.com';
 
+const getDefaultProjectForm = () => ({
+  title: '',
+  type: 'Website',
+  businessName: '',
+  url: '',
+  logoUrl: '',
+  images: [],
+  tags: [],
+  date: '',
+  description: '',
+  featuredOnHome: false,
+});
+
 export default function Admin({user}: AdminProps) {
   const [activeTab, setActiveTab] = useState<'skills' | 'projects' | 'blog'>('projects');
   const [loading, setLoading] = useState(false);
@@ -98,6 +111,7 @@ export default function Admin({user}: AdminProps) {
       const payload = activeTab === 'projects'
         ? {
             ...formData,
+            type: typeof formData.type === 'string' && formData.type.trim().length > 0 ? formData.type : 'Website',
             images: Array.isArray(formData.images) ? formData.images.filter(Boolean) : [],
             tags: Array.isArray(formData.tags) ? formData.tags.filter(Boolean) : [],
             featuredOnHome: Boolean(formData.featuredOnHome),
@@ -256,7 +270,11 @@ export default function Admin({user}: AdminProps) {
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-xl font-bold capitalize">{activeTab} List</h2>
         <button 
-          onClick={() => { setShowAddForm(true); setEditingId(null); setFormData({}); }}
+          onClick={() => {
+            setShowAddForm(true);
+            setEditingId(null);
+            setFormData(activeTab === 'projects' ? getDefaultProjectForm() : {});
+          }}
           className="bg-accent-teal text-white w-10 h-10 rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg shadow-accent-teal/20"
         >
           <Plus size={20} />

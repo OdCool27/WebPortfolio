@@ -29,7 +29,7 @@ export default function Carousel({images = []}: CarouselProps) {
           src={images[currentIndex]}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="w-full h-full object-cover cursor-zoom-in"
+          className="w-full h-full object-contain cursor-zoom-in bg-white dark:bg-zinc-950"
           onClick={() => setIsFullscreen(true)}
           referrerPolicy="no-referrer"
         />

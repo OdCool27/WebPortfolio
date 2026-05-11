@@ -16,6 +16,21 @@ export interface ProjectRecord {
   [key: string]: unknown;
 }
 
+function normalizeProjectType(value: unknown, raw: any): string {
+  const type = typeof value === 'string' ? value.trim().toLowerCase() : '';
+
+  if (type === 'website') return 'Website';
+  if (type === 'application' || type === 'app') return 'Application';
+  if (type === 'template' || type === 'ui kit' || type === 'ui-kit') return 'Template';
+  if (type === 'mobile' || type === 'mobile app' || type === 'mobileapp') return 'Mobile';
+
+  if (!type) {
+    if (raw.url || raw.businessName || raw.logoUrl) return 'Website';
+  }
+
+  return typeof value === 'string' && value.trim().length > 0 ? value.trim() : 'Website';
+}
+
 function toMillis(value: unknown): number {
   if (!value) return 0;
 
@@ -54,7 +69,7 @@ export function normalizeProject(raw: any): ProjectRecord {
     ...raw,
     id: String(raw.id ?? ''),
     title: String(raw.title ?? ''),
-    type: String(raw.type ?? ''),
+    type: normalizeProjectType(raw.type, raw),
     description: String(raw.description ?? ''),
     date: String(raw.date ?? ''),
     businessName: typeof raw.businessName === 'string' ? raw.businessName : '',

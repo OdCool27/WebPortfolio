@@ -72,7 +72,7 @@ export default function Home() {
             <h3 className="text-xs uppercase tracking-widest font-bold text-accent-teal">Featured Project</h3>
             {featuredProject ? (
               <div className="relative group aspect-video card-zinc cursor-pointer">
-                <img src={featuredProject.images[0] || featuredProject.image} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" referrerPolicy="no-referrer" />
+                <img src={featuredProject.images[0] || featuredProject.image} className="w-full h-full object-contain bg-white dark:bg-zinc-950 opacity-80 group-hover:opacity-100 transition-opacity" referrerPolicy="no-referrer" />
                 <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent text-white">
                   <p className="text-[10px] uppercase tracking-widest opacity-70 mb-2">{featuredProject.type || 'Project'}</p>
                   <h4 className="text-2xl font-bold">{featuredProject.title}</h4>
@@ -137,9 +137,18 @@ export default function Home() {
                 websites.slice(0, 6).map((site) => (
                   <motion.div 
                     key={site.id}
-                    className="relative group aspect-square bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl flex items-center justify-center cursor-pointer overflow-hidden transition-all duration-300"
+                    className="relative group aspect-square bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl flex items-center justify-center cursor-pointer overflow-hidden transition-all duration-300 p-6"
                   >
-                    <span className="text-4xl opacity-20 font-bold">{site.icon || site.title?.charAt(0)}</span>
+                    {site.logoUrl || site.logo ? (
+                      <img
+                        src={site.logoUrl || site.logo}
+                        alt={site.title}
+                        className="max-w-full max-h-full object-contain opacity-70 transition-opacity duration-300 group-hover:opacity-100"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <span className="text-4xl opacity-20 font-bold">{site.icon || site.title?.charAt(0)}</span>
+                    )}
                     
                     {/* Hover Overlay */}
                     <div className="absolute inset-0 bg-teal-600 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-4">
@@ -173,7 +182,7 @@ export default function Home() {
                     className="p-4 bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl flex gap-6 hover:border-accent-teal/50 transition-colors cursor-pointer group"
                   >
                     <div className="w-20 h-20 bg-teal-100 dark:bg-teal-900 rounded-lg flex-shrink-0 flex items-center justify-center text-3xl font-bold text-accent-teal overflow-hidden">
-                      <img src={app.images?.[0] || app.image} className="w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all" referrerPolicy="no-referrer" />
+                      <img src={app.images?.[0] || app.image} className="w-full h-full object-contain bg-white dark:bg-zinc-950 grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all" referrerPolicy="no-referrer" />
                     </div>
                     <div className="flex flex-col justify-center">
                       <h4 className="text-sm font-bold mb-1">{app.title}</h4>
