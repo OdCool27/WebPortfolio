@@ -25,6 +25,11 @@ const getDefaultProjectForm = () => ({
   featuredOnHome: false,
 });
 
+const getProjectFormData = (item: any) => ({
+  ...getDefaultProjectForm(),
+  ...normalizeProject(item),
+});
+
 export default function Admin({user}: AdminProps) {
   const [activeTab, setActiveTab] = useState<'skills' | 'projects' | 'blog'>('projects');
   const [loading, setLoading] = useState(false);
@@ -32,6 +37,7 @@ export default function Admin({user}: AdminProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Form states
   const [formData, setFormData] = useState<any>({});
@@ -106,19 +112,30 @@ export default function Admin({user}: AdminProps) {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setSaveError(null);
     const colName = activeTab === 'blog' ? 'blogPosts' : activeTab;
     try {
       const payload = activeTab === 'projects'
         ? {
-            ...formData,
+            title: String(formData.title ?? '').trim(),
             type: typeof formData.type === 'string' && formData.type.trim().length > 0 ? formData.type : 'Website',
-            images: Array.isArray(formData.images) ? formData.images.filter(Boolean) : [],
-            tags: Array.isArray(formData.tags) ? formData.tags.filter(Boolean) : [],
+            businessName: String(formData.businessName ?? '').trim(),
+            url: String(formData.url ?? '').trim(),
+            logoUrl: String(formData.logoUrl ?? '').trim(),
+            images: Array.isArray(formData.images) ? formData.images.map(String).map((value) => value.trim()).filter(Boolean) : [],
+            tags: Array.isArray(formData.tags) ? formData.tags.map(String).map((value) => value.trim()).filter(Boolean) : [],
+            date: String(formData.date ?? '').trim(),
+            description: String(formData.description ?? '').trim(),
             featuredOnHome: Boolean(formData.featuredOnHome),
             updatedAt: serverTimestamp(),
           }
         : {
-            ...formData,
+            title: String(formData.title ?? '').trim(),
+            excerpt: String(formData.excerpt ?? '').trim(),
+            category: String(formData.category ?? '').trim(),
+            image: String(formData.image ?? '').trim(),
+            date: String(formData.date ?? '').trim(),
+            content: String(formData.content ?? '').trim(),
             updatedAt: serverTimestamp(),
           };
 
@@ -154,7 +171,11 @@ export default function Admin({user}: AdminProps) {
       setFormData({});
       await fetchItems();
     } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, colName);
+      try {
+        handleFirestoreError(error, OperationType.WRITE, colName);
+      } catch (handledError) {
+        setSaveError(handledError instanceof Error ? handledError.message : 'Unable to save changes.');
+      }
     } finally {
       setLoading(false);
     }
@@ -296,7 +317,12 @@ export default function Admin({user}: AdminProps) {
             </div>
             <div className="flex gap-2">
               <button 
-                onClick={() => { setEditingId(item.id); setFormData(item); setShowAddForm(true); }}
+                onClick={() => {
+                  setEditingId(item.id);
+                  setFormData(activeTab === 'projects' ? getProjectFormData(item) : item);
+                  setSaveError(null);
+                  setShowAddForm(true);
+                }}
                 className="p-2 hover:text-accent-teal transition-colors"
               >
                 <Edit2 size={18} />
@@ -327,6 +353,12 @@ export default function Admin({user}: AdminProps) {
             <h2 className="text-2xl font-bold mb-8 uppercase tracking-tighter">
               {editingId ? 'Edit' : 'Add New'} {activeTab.slice(0, -1)}
             </h2>
+
+            {saveError && (
+              <p className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
+                {saveError}
+              </p>
+            )}
 
             <form onSubmit={handleSave} className="space-y-6">
               {activeTab === 'skills' ? (
